@@ -27,6 +27,8 @@ public class TimelineActivity extends AppCompatActivity {
     private TweetsAdapter tweetsAdapter;
     private List<Tweet> tweets;
 
+    private SwipeRefreshLayout  swipeContainer;
+
 
 
     @Override
@@ -38,6 +40,8 @@ public class TimelineActivity extends AppCompatActivity {
 
         rvTweets= findViewById(R.id.rvTweets);
 
+        swipeContainer = findViewById(R.id.swipeContainer);
+
         tweets = new ArrayList<>();
 
         tweetsAdapter = new TweetsAdapter(this,tweets);
@@ -46,7 +50,25 @@ public class TimelineActivity extends AppCompatActivity {
 
         rvTweets.setAdapter(tweetsAdapter);
 
-        populateHomeTimeline();
+
+
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.d("TwitterClient","content is being refresh");
+                populateHomeTimeline();
+            }
+        });
+
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+
+                android.R.color.holo_green_light,
+
+                android.R.color.holo_orange_light,
+
+                android.R.color.holo_red_light);
+
+
 
     }
 
@@ -56,17 +78,24 @@ public class TimelineActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
 //                Log.d("TwitterClient",response.toString());
-
+                List<Tweet> tweetToAdd = new ArrayList<>();
                 for(int i=0; i<response.length(); i++){
                     try {
                         JSONObject jsonObject = response.getJSONObject(i);
                         Tweet tweet = Tweet.fromJson(jsonObject);
-                        tweets.add(tweet);
-                        tweetsAdapter.notifyItemInserted(tweets.size()-1);
+
+                        tweetToAdd.add(tweet);
+//                        tweets.add(tweet);
+//                        tweetsAdapter.notifyItemInserted(tweets.size()-1);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
+
+                tweetsAdapter.clear();
+                tweetsAdapter.addAll(tweetToAdd);
+                swipeContainer.setRefreshing(false);
+
             }
 
             @Override
