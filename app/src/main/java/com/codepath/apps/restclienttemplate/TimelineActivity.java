@@ -67,9 +67,6 @@ public class TimelineActivity extends AppCompatActivity {
                 android.R.color.holo_orange_light,
 
                 android.R.color.holo_red_light);
-
-
-
     }
 
     private void populateHomeTimeline() {
