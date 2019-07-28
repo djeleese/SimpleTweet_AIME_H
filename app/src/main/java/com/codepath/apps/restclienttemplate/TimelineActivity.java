@@ -99,6 +99,7 @@ public class TimelineActivity extends AppCompatActivity {
                 tweetsAdapter.clear();
                 tweetsAdapter.addAll(tweetToAdd);
                 swipeContainer.setRefreshing(false);
+                scrollListener.resetState();
             }
         },page);
     }
