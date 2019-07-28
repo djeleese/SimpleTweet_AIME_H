@@ -7,13 +7,18 @@ public class Tweet {
     public  String body;
     public  long uid;
     public  String createdAt;
+//    public  String url_image;
+
+
     public  User user;
+
 
     public static  Tweet fromJson(JSONObject jsonObject) throws JSONException {
         Tweet tweet = new Tweet();
         tweet.body = jsonObject.getString("text");
         tweet.uid = jsonObject.getLong("id");
         tweet.createdAt = jsonObject.getString("created_at");
+//        tweet.url_image = jsonObject.getString("url");
 
         tweet.user = User.fromJson(jsonObject.getJSONObject("user"));
 
