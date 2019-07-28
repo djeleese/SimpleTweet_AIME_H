@@ -30,6 +30,8 @@ public class TimelineActivity extends AppCompatActivity {
 
     private SwipeRefreshLayout  swipeContainer;
 
+    private EndlessRecyclerViewScrollListener scrollListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +50,16 @@ public class TimelineActivity extends AppCompatActivity {
         rvTweets.setLayoutManager(new LinearLayoutManager(this));
 
         rvTweets.setAdapter(tweetsAdapter);
+        scrollListener = new EndlessRecyclerViewScrollListener(new LinearLayoutManager(this)){
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to the bottom of the list
+                loadNextDataFromApi(page);
+            }
+        };
+
+        rvTweets.addOnScrollListener(scrollListener);
 
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -64,6 +76,31 @@ public class TimelineActivity extends AppCompatActivity {
                 android.R.color.holo_orange_light,
 
                 android.R.color.holo_red_light);
+    }
+
+    private void loadNextDataFromApi(int page) {
+        client.getNextPageOfTweets(new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                List<Tweet> tweetToAdd = new ArrayList<>();
+                for(int i=0; i<response.length(); i++){
+                    try {
+                        JSONObject jsonObject = response.getJSONObject(i);
+                        Tweet tweet = Tweet.fromJson(jsonObject);
+
+                        tweetToAdd.add(tweet);
+//                        tweets.add(tweet);
+//                        tweetsAdapter.notifyItemInserted(tweets.size()-1);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                tweetsAdapter.clear();
+                tweetsAdapter.addAll(tweetToAdd);
+                swipeContainer.setRefreshing(false);
+            }
+        },page);
     }
 
     private void populateHomeTimeline() {
